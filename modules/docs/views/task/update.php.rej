@@ -1,0 +1,10 @@
+diff a/modules/docs/views/task/update.php b/modules/docs/views/task/update.php	(rejected hunks)
+@@ -16,7 +16,7 @@ $this->params['breadcrumbs'][] = Module::t('task', 'UPDATE__PAGE__TITLE');
+ 
+     <h1><?= Html::encode($this->title) ?></h1>
+ 
+-    <?= $this->render('_form-'.$scenario, [
++    <?= $this->render('_form', [
+         'model' => $model,
+     ]) ?>
+ 

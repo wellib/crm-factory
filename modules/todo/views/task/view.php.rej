@@ -1,0 +1,46 @@
+diff a/modules/todo/views/task/view.php b/modules/todo/views/task/view.php	(rejected hunks)
+@@ -14,7 +14,17 @@ $this->title = $model->subject;
+ //$this->params['breadcrumbs'][] = ['label' => Module::t('task', 'Tasks'), 'url' => ['index']];
+ $this->params['breadcrumbs'][] = $this->title;
+ ?>
++<?php
++/*
++echo $model->deadline_date.'<br/>';
++echo $model->deadline_time.'<br/>';
++echo $model->deadline_timestamp.'<br/>';
++echo $model->perform_timestamp.'<br/>';
++echo $model->perform_date.'<br/>';
++echo $model->perform_time.'<br/>';
++*/
+ 
++?>
+ <?= Tabs::widget([
+     'items' => [
+         [
+@@ -39,7 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
+ <div class="task-view">
+     <?php Panel::begin(); ?>
+     <h1><?= Html::encode($this->title) ?></h1>
+-    <?php if (Yii::$app->getUser()->getId() == $model->_author && $model->status !== Task::STATUS__DONE): ?>
++    <?php if ((Yii::$app->getUser()->getId() == $model->_author && $model->status !== Task::STATUS__DONE) || Yii::$app->getUser()->getIdentity()->nickname === 'root'): ?>
+     <p>
+         <?= Html::a(Module::t('task', 'UPDATE___LINK__LABEL'), ['update', 'id' => (string)$model->_id], ['class' => 'btn btn-primary']) ?>
+         <? /*= Html::a(Module::t('task', 'DELETE___LINK__LABEL'), ['delete', 'id' => (string)$model->_id], [
+@@ -62,11 +72,17 @@ $this->params['breadcrumbs'][] = $this->title;
+     <?php endforeach; ?>
+     <?php \yii\redactor\widgets\RedactorAsset::register($this) ?>
+     <?= $this->render('_redactor-editor-styles') ?>
++
++<?php
++//var_dump($model);
++
++?>
+     <?= DetailView::widget([
+         'model' => $model,
+         'template' => "<tr><th width=\"225\">{label}</th><td>{value}</td></tr>",
+         'attributes' => [
+             //'_id',
++			//'_parent',
+             'id',
+             'subject',
+             [

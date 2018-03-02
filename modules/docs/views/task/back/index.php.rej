@@ -1,0 +1,14 @@
+diff a/modules/docs/views/task/back/index.php b/modules/docs/views/task/back/index.php	(rejected hunks)
+@@ -3,10 +3,10 @@
+ use yii\helpers\Html;
+ use yii\grid\GridView;
+ use yii\widgets\Pjax;
+-use app\modules\docs\Module;
++use app\modules\todo\Module;
+ 
+ /* @var $this yii\web\View */
+-/* @var $searchModel app\modules\docs\models\TaskSearch */
++/* @var $searchModel app\modules\todo\models\TaskSearch */
+ /* @var $dataProvider yii\data\ActiveDataProvider */
+ 
+ $this->title = Module::t('task', 'Tasks');

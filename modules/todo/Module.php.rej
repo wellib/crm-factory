@@ -1,0 +1,19 @@
+diff a/modules/todo/Module.php b/modules/todo/Module.php	(rejected hunks)
+@@ -202,7 +202,7 @@ class Module extends \yii\base\Module
+             'url' => '#todo',
+             'controllerId' => 'task',
+             'icon' => 'check',
+-            'sort' => 2000,
++            'sort' => 7000,
+             //'badge' => $allCount,
+             //'badgeOptions' => ['class'=>'label-info'],
+ 
+@@ -243,7 +243,7 @@ class Module extends \yii\base\Module
+                     'label' => Module::t('calendar_period', 'MODEL_NAME_PLURAL'),
+                     'url' => ['/todo/calendar-period/index'],
+                     'icon' => 'calendar',
+-                    'visible' => !Yii::$app->getUser()->isGuest && Yii::$app->getUser()->getIdentity()->nickname === 'root',
++                    'visible' => false && !Yii::$app->getUser()->isGuest && Yii::$app->getUser()->getIdentity()->nickname === 'root',
+                 ],
+                 [
+                     'label' => 'Создать задачу',

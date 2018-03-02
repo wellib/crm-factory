@@ -1,0 +1,10 @@
+diff a/modules/accounts/Module.php b/modules/accounts/Module.php	(rejected hunks)
+@@ -148,7 +148,7 @@ class Module extends \yii\base\Module implements \yii\base\BootstrapInterface
+             return false;
+         }
+ 
+-        if (!Yii::$app->getUser()->isGuest && Yii::$app->getUser()->getIdentity()->nickname === 'root') {
++        if (false && !Yii::$app->getUser()->isGuest && Yii::$app->getUser()->getIdentity()->nickname === 'root') {
+             //добавим пукнт меню в админку
+             $appModule->addMenuItem([
+                 'label' => self::t('user', 'MODEL_NAME'),

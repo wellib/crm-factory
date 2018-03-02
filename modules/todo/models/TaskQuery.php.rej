@@ -1,0 +1,42 @@
+diff a/modules/todo/models/TaskQuery.php b/modules/todo/models/TaskQuery.php	(rejected hunks)
+@@ -91,11 +91,12 @@ class TaskQuery extends \yii\mongodb\ActiveQuery
+             'status' => Task::STATUS__IN_PROGRESS, // статус задачи "выполняется"
+         ]);
+         $performers->andWhere(['!=','_users_performers_finished.'.$userID, true]); // я еще не завершил выполнение данной задачи
+-        $performers->andWhere(['>=', 'deadline_timestamp', $now]); // срок выполнения задачи БОЛЬШЕ чем "сейчас"
+-        $performers->andWhere(['<=', 'perform_timestamp', $now]); // срок выполнения задачи МЕНЬШЕ чем "сейчас" (т.е. просрочено)
++        //$performers->andWhere(['>=', 'deadline_timestamp', $now]); // срок выполнения задачи БОЛЬШЕ чем "сейчас"
++        $performers->andWhere(['<=', 'perform_timestamp', $now]); // срок начала выполнения задачи МЕНЬШЕ чем "сейчас" 
+         $subQuery->orWhere($performers->where);
+ 
+-
++        //$this->andWhere($subQuery->where);
++        //return $this;
+ 
+         /**
+          * Задачи в которых я выполняю роль того кто должен дать свое согласие на выполнение
+@@ -107,7 +108,8 @@ class TaskQuery extends \yii\mongodb\ActiveQuery
+             'status' => Task::STATUS__APPROVAL_AWAITING, // статус задачи "на согласовании"
+         ]);
+         $approve->andWhere(['>=', 'approve_execute_deadline_timestamp', $now]); // установленный срок на согласование задачи БОЛЬШЕ чем "сейчас"
+-        $subQuery->orWhere($approve->where);
++		$approve->andWhere(['<>', 'template', true]);   
++		$subQuery->orWhere($approve->where);
+ 
+ 
+ 
+@@ -124,7 +126,6 @@ class TaskQuery extends \yii\mongodb\ActiveQuery
+         $subQuery->orWhere($check->where);
+ 
+         $this->andWhere($subQuery->where);
+-
+         return $this;
+     }
+ 
+@@ -374,4 +375,4 @@ class TaskQuery extends \yii\mongodb\ActiveQuery
+         return $this;
+     }
+ 
+-}
+\ No newline at end of file
++}

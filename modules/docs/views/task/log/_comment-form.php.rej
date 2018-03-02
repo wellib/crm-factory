@@ -1,0 +1,10 @@
+diff a/modules/docs/views/task/log/_comment-form.php b/modules/docs/views/task/log/_comment-form.php	(rejected hunks)
+@@ -2,7 +2,7 @@
+ 
+ use yii\helpers\Html;
+ use yii\widgets\ActiveForm;
+-use app\modules\docs\models\TaskLog;
++use app\modules\todo\models\TaskLog;
+ 
+ /* @var $this yii\web\View */
+ /* @var $model TaskLog */

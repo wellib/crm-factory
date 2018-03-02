@@ -1,0 +1,10 @@
+diff a/modules/docs/views/task/create.php b/modules/docs/views/task/create.php	(rejected hunks)
+@@ -15,7 +15,7 @@ $this->params['breadcrumbs'][] = $this->title;
+ 
+     <h1><?= Html::encode($this->title) ?></h1>
+ 
+-    <?= $this->render('_form-'.$scenario, [
++    <?= $this->render('_form', [
+         'model' => $model,
+     ]) ?>
+ 

@@ -1,0 +1,17 @@
+diff a/themes/gentelella/views/layouts/layout.php b/themes/gentelella/views/layouts/layout.php	(rejected hunks)
+@@ -19,7 +19,7 @@ ThemeAsset::register($this);
+     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+     <meta name="viewport" content="width=device-width, initial-scale=1">
+     <?= Html::csrfMetaTags() ?>
+-    <title><?= Html::encode($this->title) ?></title>
++    <title><?php echo 'ЭКО-СИСТЕМА'; // Html::encode($this->title) ?></title>
+     <?php $this->head() ?>
+ </head>
+ <body class="nav-md">
+@@ -28,4 +28,4 @@ ThemeAsset::register($this);
+ <?php $this->endBody() ?>
+ </body>
+ </html>
+-<?php $this->endPage() ?>
+\ No newline at end of file
++<?php $this->endPage() ?>

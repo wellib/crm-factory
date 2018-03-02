@@ -1,0 +1,59 @@
+diff a/modules/docs/views/task/index.php b/modules/docs/views/task/index.php	(rejected hunks)
+@@ -61,7 +61,7 @@ $columns = [
+         ]),
+         'value' => function($model) use ($searchModel) {
+             /** @var Task $model */
+-            return $model->author->getNameAndPosition();
++            //return $model->author->getNameAndPosition();
+             //return $this->render('_task-user-list', ['model' => $model, 'searchModel' => $searchModel]);
+         },
+     ],
+@@ -183,6 +183,7 @@ $columns = [
+             'attribute' => 'deadline_timestamp_from',
+             'attribute2' => 'deadline_timestamp_to',
+             'pickerButton' => false,
++						'layout' => '<span class="input-group-addon kv-field-separator">от</span>{input1}<span class="input-group-addon kv-field-separator">до</span>{input2}',
+ 
+             'type' => DatePicker::TYPE_RANGE,
+             'pluginOptions' => [
+@@ -215,8 +216,23 @@ $columns = [
+             return $model->getStatusLabelShort();
+         },
+     ],
++
++
++
+ ];
+ 
++if (false && !Yii::$app->getUser()->isGuest && Yii::$app->getUser()->getIdentity()->nickname === 'root') {
++$columns[] =  [
++                'class' => \app\themes\gentelella\widgets\grid\ActionColumn::className(),
++                'template' => '{view} {update} {delete}',
++            ];
++}
++else {
++$columns[] =  [
++                'class' => \app\themes\gentelella\widgets\grid\ActionColumn::className(),
++                'template' => '{view}',
++            ];
++}
+ ?>
+ 
+ 
+@@ -224,7 +240,7 @@ $columns = [
+ 
+ <h1><?= Html::encode($this->title) ?></h1>
+ 
+-
++<?php if (true) :?>
+ <?= ExportMenu::widget([
+     'dataProvider' => $dataProvider,
+     'columns' => $columns,
+@@ -237,6 +253,7 @@ $columns = [
+         ExportMenu::FORMAT_CSV => false,
+     ],
+ ]); ?>
++<?php endif;?>
+ <div class="table-responsive">
+     <?= GridView::widget([
+         'dataProvider' => $dataProvider,

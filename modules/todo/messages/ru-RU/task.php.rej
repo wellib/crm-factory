@@ -1,0 +1,51 @@
+diff a/modules/todo/messages/ru-RU/task.php b/modules/todo/messages/ru-RU/task.php	(rejected hunks)
+@@ -50,20 +50,20 @@ return [
+     //'ATTR__END_TIME__LABEL'      => 'Время завершения выполнения цикла',
+     'ATTR__END_TIMESTAMP__LABEL' => 'Завершить выполнение цикла',
+ 
+-    'ATTR__DEADLINE_TIMESTAMP_APPROVE_EXECUTE__LABEL' => 'Акцептировать выполнение до',
+-    'ATTR__DEADLINE_TIMESTAMP_CHECK_RESULTS__LABEL'   => 'Акцептировать результат до',
++    'ATTR__DEADLINE_TIMESTAMP_APPROVE_EXECUTE__LABEL' => 'Акцептовать выполнение до',
++    'ATTR__DEADLINE_TIMESTAMP_CHECK_RESULTS__LABEL'   => 'Акцептовать результат до',
+ 
+     'ATTR__ATTACHED_FILES__LABEL'        => 'Прикрепленные файлы',
+     'ATTR__ATTACHED_FILES_UPLOAD__LABEL' => 'Прикрепить файлы',
+ 
+     'ATTR__USERS_APPROVE_EXECUTE__LABEL'          => 'Акцепторы задачи',
+-    'ATTR__USERS_APPROVE_EXECUTE_RESPONSE__LABEL' => 'Акцептировали выполнение',
++    'ATTR__USERS_APPROVE_EXECUTE_RESPONSE__LABEL' => 'Акцептовали выполнение',
+ 
+     'ATTR__USERS_PERFORMERS__LABEL'          => 'Исполнители',
+     'ATTR__USERS_PERFORMERS_FINISHED__LABEL' => 'Исполнители завершившие выполнение задачи',
+ 
+     'ATTR__USERS_CHECK_RESULT__LABEL'          => 'Акцепторы результата',
+-    'ATTR__USERS_CHECK_RESULT_RESPONSE__LABEL' => 'Акцептировали результат',
++    'ATTR__USERS_CHECK_RESULT_RESPONSE__LABEL' => 'Акцептовали результат',
+ 
+     'ATTR__USERS_NOTIFY_AFTER_FINISHED__LABEL' => 'Уведомить о выполнении',
+ 
+@@ -110,7 +110,7 @@ return [
+     //'ATTR__USERS_APPROVED_FINISHED_PERFORM__LABEL' => 'Подтвердили что задача выполнена',
+     //
+     'ATTR__USERS_CONTROL_RESULTS__LABEL' => 'Акцепторы результата',
+-    'ATTR__USERS_CONTROL_RESULTS__HINT' => 'По умолчанию автор задачи всегда акцептирует результат',
++    'ATTR__USERS_CONTROL_RESULTS__HINT' => 'По умолчанию автор задачи всегда акцептует результат',
+     ////'ATTR__USERS_CONTROL_RESULTS_ANSWERS__LABEL' => 'Проконтролировали результат',
+     //
+     //'ATTR__USERS_NOTIFY_AFTER_FINISHING__LABEL' => 'Уведомить о выполнении',
+@@ -191,11 +191,11 @@ return [
+     //'ATTR__DEADLINE_REPEATS_COUNTER__LABEL' => 'Выполнено повторений',
+     //
+     //
+-    'ATTR__APPROVE_EXECUTE_DEADLINE_TIMESTAMP__LABEL' => 'Акцептировать выполнение до',
+-    'ATTR__CHECK_RESULTS_DEADLINE_TIMESTAMP__LABEL' => 'Акцептировать результат до',
++    'ATTR__APPROVE_EXECUTE_DEADLINE_TIMESTAMP__LABEL' => 'Акцептовать выполнение до',
++    'ATTR__CHECK_RESULTS_DEADLINE_TIMESTAMP__LABEL' => 'Акцептовать результат до',
+     //
+     'USER_ROLES_IN_TASK' => 'Роли других сотрудников в задаче',
+     //
+     //
+     'TASK_SEARCH__ATTR__USERS__LABEL' => 'Сотрудники',
+-];
+\ No newline at end of file
++];

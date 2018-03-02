@@ -1,0 +1,9 @@
+diff a/modules/docs/views/task/log/notify_user_finished_perform_control.php b/modules/docs/views/task/log/notify_user_finished_perform_control.php	(rejected hunks)
+@@ -1,6 +1,6 @@
+ <?php
+ 
+-use app\modules\docs\models\TaskLog;
++use app\modules\todo\models\TaskLog;
+ use app\themes\gentelella\assets\GentelellaBootstrapThemeAsset;
+ 
+ /** @var $this \yii\web\View */

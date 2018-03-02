@@ -1,0 +1,11 @@
+diff a/themes/gentelella/assets/GentelellaBootstrapThemeAsset.php b/themes/gentelella/assets/GentelellaBootstrapThemeAsset.php	(rejected hunks)
+@@ -9,7 +9,8 @@ class GentelellaBootstrapThemeAsset extends AssetBundle
+     public $sourcePath = '@theme/vendor/bower/gentelella';
+     public $css = [
+         'build/css/custom.min.css',
+-        'vendors/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css'
++        'vendors/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css',
++				'css/site.css',
+     ];
+     public $js = [
+         'vendors/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.concat.min.js',

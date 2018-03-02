@@ -1,0 +1,10 @@
+diff a/views/layouts/main.php b/views/layouts/main.php	(rejected hunks)
+@@ -27,7 +27,7 @@ AppAsset::register($this);
+ <div class="wrap">
+     <?php
+     NavBar::begin([
+-        'brandLabel' => 'My Company',
++        'brandLabel' => 'ЭКО-СИСТЕМА',
+         'brandUrl' => Yii::$app->homeUrl,
+         'options' => [
+             'class' => 'navbar-inverse navbar-fixed-top',

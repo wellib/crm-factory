@@ -1,0 +1,59 @@
+diff a/modules/accounts/models/User.php b/modules/accounts/models/User.php	(rejected hunks)
+@@ -125,6 +125,8 @@ class User extends \yii\mongodb\ActiveRecord implements \yii\web\IdentityInterfa
+             'name',
+             'avatar',
+             'position',
++            'rukovodstvo',
++            'status',
+         ];
+     }
+ 
+@@ -132,7 +134,7 @@ class User extends \yii\mongodb\ActiveRecord implements \yii\web\IdentityInterfa
+     {
+         return [
+             self::SCENARIO_CREATE => ['nickname', 'email', 'name', 'position', 'password', 'avatar_upload'],
+-            self::SCENARIO_UPDATE => ['nickname', 'email', 'name', 'position', 'password', 'avatar_upload', 'avatar_delete'],
++            self::SCENARIO_UPDATE => ['nickname', 'email', 'name', 'position', 'rukovodstvo', 'status', 'password', 'avatar_upload', 'avatar_delete'],
+         ];
+     }
+ 
+@@ -143,7 +145,7 @@ class User extends \yii\mongodb\ActiveRecord implements \yii\web\IdentityInterfa
+     {
+         return [
+             // default rules
+-            [['nickname', 'email', 'password_hash', 'name', 'avatar', 'position', 'password'], 'string'],
++            [['nickname', 'email', 'password_hash', 'name', 'avatar', 'position', 'password', 'rukovodstvo', 'status'], 'string'],
+             [['created_at', 'updated_at'], 'integer'],
+ 
+             [['position'], 'default', 'value' => null],
+@@ -200,7 +202,8 @@ class User extends \yii\mongodb\ActiveRecord implements \yii\web\IdentityInterfa
+             'position'      => Module::t('user', 'ATTRIBUTE__POSITION__LABEL'),
+             'created_at'    => Module::t('user', 'ATTRIBUTE__CREATED_AT__LABEL'),
+             'updated_at'    => Module::t('user', 'ATTRIBUTE__UPDATED_AT__LABEL'),
+-
++						'rukovodstvo' => Module::t('user', 'ATTRIBUTE__RUK__LABEL'),
++						'status'    => Module::t('user', 'ATTRIBUTE__STATUS__LABEL'),
+             // virtual attributes
+             'password'      => Module::t('user', 'ATTRIBUTE__PASSWORD__LABEL'),
+             'avatar_upload' => Module::t('user', 'ATTRIBUTE__AVATAR_UPLOAD__LABEL'),
+@@ -251,6 +254,14 @@ class User extends \yii\mongodb\ActiveRecord implements \yii\web\IdentityInterfa
+         return (string) $this->_id;
+     }
+ 
++    public function getStatus()
++    {
++				if ($this->status || $this->rukovodstvo)
++					return 1;
++				
++        return (string) $this->status;
++    }
++
+     /**
+      * @return string
+      */
+@@ -417,4 +428,5 @@ class User extends \yii\mongodb\ActiveRecord implements \yii\web\IdentityInterfa
+                 ->setHtmlBody($body)
+                 ->send();
+     }
++
+ }

@@ -1,0 +1,20 @@
+diff a/modules/docs/views/company/index.php b/modules/docs/views/company/index.php	(rejected hunks)
+@@ -16,7 +16,7 @@ $this->params['breadcrumbs'][] = $this->title;
+     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+ 
+     <p>
+-        <?= Html::a('Добавить предприятие', ['create'], ['class' => 'btn btn-success']) ?>
++        <?= Html::a('Добавить компанию', ['create'], ['class' => 'btn btn-success']) ?>
+     </p>
+     <?= GridView::widget([
+         'dataProvider' => $dataProvider,
+@@ -26,8 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
+ 
+             //'_id',
+             'name',
+-
+-            ['class' => 'yii\grid\ActionColumn'],
++            ['class' => \app\themes\gentelella\widgets\grid\ActionColumn::className()],
+         ],
+     ]); ?>
+ </div>

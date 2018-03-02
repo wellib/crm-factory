@@ -1,0 +1,288 @@
+diff a/modules/todo/controllers/TaskController.php b/modules/todo/controllers/TaskController.php	(rejected hunks)
+@@ -269,7 +269,7 @@ class TaskController extends Controller
+ 
+ 
+         if ($isNewRecord === true) {
+-            $model->deadline_time = $model->getTimeEndValue();
++            //$model->deadline_time = $model->getTimeEndValue();
+         }
+ 
+         if ($model->load(Yii::$app->request->post())){
+@@ -296,12 +296,166 @@ class TaskController extends Controller
+                     $model->_author = $userID;
+                 }
+ 
++
+                 $model->attachedFilesUpload = UploadedFile::getInstances($model, 'attachedFilesUpload');
+                 $model->uploadAttachedFiles();
+ 
+-
+-                
+-                if ($model->save(false)) {
++//
++//
++								//клон задач
++												switch ($model->deadline_type) {
++														case $model::DEADLINE_TYPE__ONE_TIME:
++																$model->save(false);
++																break;
++														case $model::DEADLINE_TYPE__EVERY_DAY:
++														case $model::DEADLINE_TYPE__EVERY_WEEK:
++														case $model::DEADLINE_TYPE__EVERY_MONTH:
++																$weekDays = $model->deadline_type == $model::DEADLINE_TYPE__EVERY_DAY ? [1,2,3,4,5] : $model->deadline_every_week;
++																$workDays = [1,2,3,4,5];
++																$current = $model->perform_timestamp;
++																$diff = $model->deadline_timestamp - $model->perform_timestamp;
++
++																//разница рабочих дней
++																$diffwork = 0;
++																$holiday = 0;
++																if (date('d.m.Y', $model->deadline_timestamp) == date('d.m.Y', $model->perform_timestamp)) {
++																		$diffwork = $model->deadline_timestamp - $model->perform_timestamp;
++																}
++																else {
++																		while ($current <= $model->deadline_timestamp) {
++																			$item = date('N',$current);
++																			if (!in_array($item, $workDays) ) {
++																					$holiday ++ ;
++																			}
++																			$current = $current + 60*60*24;
++																		}
++																		$diffwork = $model->deadline_timestamp - $model->perform_timestamp - ($holiday * 60*60*24);
++																}
++
++																$step = 0;
++																$current = $model->deadline_timestamp;
++																while ($current <= $model->end_timestamp) {
++																	if ($model->deadline_type == $model::DEADLINE_TYPE__EVERY_MONTH) {
++																			$item = date('j',$current);
++																			$weekDays = $model->deadline_every_month;
++																	}
++																	else
++																			$item = date('N',$current);
++
++																	if (in_array($item, $weekDays) ) {
++
++																		if ($step == 0) {
++																				//$model->perform_timestamp = $current;
++																				//$model->deadline_timestamp = $current + $diff;
++																				//var_dump(date('d.m.Y H:i', $model->perform_timestamp));echo '<br/>';
++																				//var_dump(date('d.m.Y H:i', $model->deadline_timestamp));echo '<br/>';
++																				//var_dump('first');echo '<br/>';
++																				$model->save(false);
++																		}
++																		else {
++																				$newmodel = new Task();
++																				$newmodel->setScenario($model->deadline_type);
++																				$newmodel->attributes = $model->attributes;
++																				$newmodel->_parent = $model->_id;
++																				$newmodel->_author = $model->_author;
++																				$newmodel->perform_timestamp = $current - $diffwork;
++
++																				if (date('N',$newmodel->perform_timestamp) == 7) {
++																						//выходной день - воскресенье, то начало - пятница - 2*60*60*24
++																						$newmodel->perform_timestamp = $newmodel->perform_timestamp - (2 * 60*60*24);
++																				}
++																				if (date('N',$newmodel->perform_timestamp) == 6) {
++																						//выходной день - субботу, то начало - пятница - 2*60*60*24
++																						$newmodel->perform_timestamp = $newmodel->perform_timestamp - (1 * 60*60*24);
++																				}
++																				$newmodel->deadline_timestamp = $current;
++																				$newmodel->template = True;
++																				$newmodel->subject = $model->subject.' (периодическая задача)';
++																				//var_dump(date('d.m.Y H:i', $newmodel->perform_timestamp));echo '<br/>';
++																				//var_dump(date('d.m.Y H:i', $newmodel->deadline_timestamp));echo '<br/>';
++																				if ($newmodel->save()) {
++																				}
++																		}
++																		$step++;
++																	}
++																	$current = $current + 60*60*24;															
++																}
++
++																break;
++														case $model::DEADLINE_TYPE__EVERY_DATE:
++																if (!is_array($model->deadline_every_date)) {
++																		return false;
++																}
++																
++																$day = $model->deadline_every_date[0];
++																//$model->perform_timestamp = strtotime($day . ' '.date('H:i',strtotime($model->perform_date)));
++																//$model->deadline_timestamp = strtotime($day . ' '.date('H:i',strtotime($model->deadline_date)));
++																$model->save(false);	
++
++
++																//разница рабочих дней
++																$current = $model->perform_timestamp;
++																$workDays = [1,2,3,4,5];
++																$diffwork = 0;
++																$holiday = 0;
++																if (date('d.m.Y', $model->deadline_timestamp) == date('d.m.Y', $model->perform_timestamp)) {
++																		$diffwork = $model->deadline_timestamp - $model->perform_timestamp;
++																}
++																else {
++																		while ($current <= $model->deadline_timestamp) {
++																			$item = date('N',$current);
++																			if (!in_array($item, $workDays) ) {
++																					$holiday ++ ;
++																			}
++																			$current = $current + 60*60*24;
++																		}
++																		$diffwork = $model->deadline_timestamp - $model->perform_timestamp - ($holiday * 60*60*24);
++																}
++
++
++																//var_dump($model->deadline_every_date);echo '<br/>';
++																foreach ($model->deadline_every_date as $key => $day) {
++
++																		if ($key == 0) continue;
++
++																		$newmodel = new Task();
++																		$newmodel->setScenario($model->deadline_type);
++																		$newmodel->attributes = $model->attributes;
++																		$newmodel->_parent = $model->_id;
++																		$newmodel->_author = $model->_author;
++																		$newmodel->subject = $model->subject.' (периодическая задача)';
++
++																		//$newmodel->perform_timestamp = strtotime($day . ' '.date('H:i',$model->perform_timestamp));
++																		//$newmodel->deadline_timestamp = strtotime($day . ' '.date('H:i',$model->deadline_timestamp));
++																		$current = strtotime($day . ' '.date('H:i',$model->deadline_timestamp));
++																		$newmodel->perform_timestamp = $current - $diffwork;
++																		if (date('N',$newmodel->perform_timestamp) == 7) {
++																						//выходной день - воскресенье, то начало - пятница - 2*60*60*24
++																						$newmodel->perform_timestamp = $newmodel->perform_timestamp - (2 * 60*60*24);
++																		}
++																		if (date('N',$newmodel->perform_timestamp) == 6) {
++																						//выходной день - субботу, то начало - пятница - 2*60*60*24
++																						$newmodel->perform_timestamp = $newmodel->perform_timestamp - (1 * 60*60*24);
++																		}
++																		$newmodel->deadline_timestamp = $current;
++
++																		//var_dump(date('d.m.Y H:i', $newmodel->perform_timestamp));echo '<br/>';
++																		//var_dump(date('d.m.Y H:i', $newmodel->deadline_timestamp));echo '<br/>';
++
++																		$newmodel->template = True;
++																		if ($newmodel->save()) {
++																		} 
++
++																}
++
++																
++																break;
++														default:
++																break;
++												}
++//
++//
++               // if ($model->save(false)) {
+                     if ($isNewRecord === true) {
+                         TaskLog::createNotify($model, TaskLog::NOTIFY_TASK_CREATED, Task::getUserModelId($userID));
+                         if ($model->status === Task::STATUS__APPROVAL_AWAITING) {
+@@ -315,65 +469,9 @@ class TaskController extends Controller
+                         ]);
+                     }
+                     return $this->redirect(['view', 'id' => (string)$model->_id]);
+-                }
++               // }
+             }
+ 
+-            //$model->setScenario($model->deadline_type);
+-            //var_dump($model->start_date);
+-            //if (Yii::$app->request->isAjax) {
+-            //    //var_dump($model->deadline_every_week);
+-            //    VarDumper::dump($model->deadline_every_week, 10, true);
+-            //    //VarDumper::dump($_POST, 10, true);
+-            //}
+-            //$model->validate();
+-            //var_dump($model->save());
+-            //if (Yii::$app->request->isAjax) {
+-                //var_dump($model->deadline_every_week);
+-                //VarDumper::dump($model->deadline_every_week, 10, true);
+-                //VarDumper::dump(array_keys($model->getDeadlineWeekDaysList()), 10, true);
+-                //VarDumper::dump($_POST, 10, true);
+-            //}
+-            //var_dump($model->end_date);
+-            //$model->setDeadline(true);
+-
+-            //if ($model->validate()) {
+-            //
+-            //    if ($model->isNewRecord) {
+-            //        //var_dump($model->_users_performers);
+-            //        $meId = Yii::$app->getUser()->getId();
+-            //        if (isset($model->_users_performers[0]) && $model->_users_performers[0] != $meId) {
+-            //            $userList = $model->_users_control_results;
+-            //            $userList[] = Yii::$app->getUser()->getId();
+-            //            $model->setAttribute('_users_control_results', $userList);
+-            //        }
+-            //    }
+-            //
+-            //    if ($model->save(false)) {
+-            //
+-            //        if (in_array($model->status, [Task::STATUS_AWAITING_APPROVAL, Task::STATUS_DENIED_APPROVAL])) {
+-            //            $model->setAttribute('_users_approve_execute_answers', []);
+-            //            //TaskLog::createNotify($this, TaskLog::NOTIFY_AGAIN_APPROVE);
+-            //            $model->status = Task::STATUS_AWAITING_APPROVAL;
+-            //        }
+-            //
+-            //        if ($isNewRecord === true) {
+-            //            TaskLog::createNotify($model, TaskLog::NOTIFY_TASK_CREATED, Task::getUserModelId(Yii::$app->getUser()->getId()));
+-            //            if ($model->status === Task::STATUS_AWAITING_APPROVAL) {
+-            //                TaskLog::createNotify($model, TaskLog::NOTIFY_TASK_AWAITING_APPROVAL);
+-            //            } elseif ($model->status === Task::STATUS_AWAITING_EXECUTION) {
+-            //                TaskLog::createNotify($model, TaskLog::NOTIFY_TASK_AWAITING_EXECUTION);
+-            //            }
+-            //        } else {
+-            //            $newModelData = $model->toArray($model->listenChangeAttributes());
+-            //            TaskLog::createNotify($model, TaskLog::NOTIFY_TASK_UPDATED, Task::getUserModelId(Yii::$app->getUser()->getId()),[
+-            //                'oldModelData' => $oldModelData,
+-            //                'newModelData' => $newModelData,
+-            //            ]);
+-            //        }
+-            //    }
+-            //
+-            //    return $this->redirect(['view', 'id' => (string)$model->_id]);
+-            //} // validate
+         }
+ 
+         return $this->render($model->isNewRecord ? 'create' : 'update', [
+@@ -391,10 +489,21 @@ class TaskController extends Controller
+     {
+         $model = $this->findModel($id);
+         $url = $model->getViewUrl(true);
+-        $model->delete();
++        
++		//все дочерние задачи
++		$subtasks = Task::find()->where(['_parent' => $model->_id])->all();
++		foreach ($subtasks as $subtask) {
++			$subtask->delete();
++		}
++		
++		$model->delete();
++		
+         if (Yii::$app->request->referrer == $url) {
+             return $this->redirect(['outbox-done']);
+         }
++		
++
++							
+         return $this->redirect(Yii::$app->request->referrer);
+     }
+ 
+@@ -448,7 +557,7 @@ class TaskController extends Controller
+         return $this->render('inbox-awaiting-response', [
+             'searchModel'  => $searchModel,
+             'dataProvider' => $dataProvider,
+-            'displayStatusColumn' => true,
++            'displayStatusColumn' => false,
+         ]);
+     }
+ 
+@@ -469,7 +578,7 @@ class TaskController extends Controller
+         return $this->render('inbox-overdue', [
+             'searchModel'  => $searchModel,
+             'dataProvider' => $dataProvider,
+-            'displayStatusColumn' => true,
++            'displayStatusColumn' => false,
+         ]);
+     }
+ 

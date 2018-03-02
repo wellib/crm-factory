@@ -1,0 +1,10 @@
+diff a/modules/docs/views/task/log/notify_task_denied_approval.php b/modules/docs/views/task/log/notify_task_denied_approval.php	(rejected hunks)
+@@ -1,7 +1,7 @@
+ <?php
+ 
+ use app\modules\accounts\models\User;
+-use app\modules\docs\models\TaskLog;
++use app\modules\todo\models\TaskLog;
+ 
+ 
+ /** @var $this \yii\web\View */

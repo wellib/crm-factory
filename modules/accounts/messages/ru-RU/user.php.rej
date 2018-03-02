@@ -1,0 +1,26 @@
+diff a/modules/accounts/messages/ru-RU/user.php b/modules/accounts/messages/ru-RU/user.php	(rejected hunks)
+@@ -14,13 +14,16 @@ return [
+     'ATTRIBUTE__CREATED_AT__LABEL' => 'Добавлен',
+     'ATTRIBUTE__UPDATED_AT__LABEL' => 'Последнее изменение',
+ 
++    'ATTRIBUTE__STATUS__LABEL' => 'Начальник юридического отдела',
++		'ATTRIBUTE__RUK__LABEL' => 'Руководящий состав',
++
+     'ATTRIBUTE__PASSWORD__LABEL' => 'Пароль',
+     'ATTRIBUTE__AVATAR_UPLOAD__LABEL' => 'Загрузить аватарку',
+     'ATTRIBUTE__AVATAR_DELETE__LABEL' => 'Удалить загруженную аватарку',
+ 
+ 
+     'CREATE__FORM__SUBMIT_BTN' => 'Добавить сотрудника',
+-    'UPDATE__FORM__SUBMIT_BTN' => 'Созранить изменения',
++    'UPDATE__FORM__SUBMIT_BTN' => 'Сохранить изменения',
+ 
+     'CREATE__PAGE__TITLE' => 'Добавление сотрудника',
+     'UPDATE__PAGE__TITLE' => 'Изменение сотрудника',
+@@ -31,4 +34,4 @@ return [
+     'DELETE___LINK__CONFIRM_MESSAGE' => 'Вы действительно хотите удалить данного сотрудника?',
+ 
+     'HTTP_ERROR__NOT_FOUND' => 'Ой :( Такого сотрудника не существует, возможно он был удален!',
+-];
+\ No newline at end of file
++];

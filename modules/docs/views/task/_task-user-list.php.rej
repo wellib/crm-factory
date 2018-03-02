@@ -1,0 +1,8 @@
+diff a/modules/docs/views/task/_task-user-list.php b/modules/docs/views/task/_task-user-list.php	(rejected hunks)
+@@ -47,4 +47,4 @@ $mark = function($model) use ($searchUser) {
+         <li><?= $mark($user) ?></li>
+     <?php endforeach; ?>
+ </ul>
+-<?php endif; ?>
+\ No newline at end of file
++<?php endif; ?>

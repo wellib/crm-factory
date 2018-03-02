@@ -1,0 +1,8 @@
+diff a/modules/docs/views/task/done.php b/modules/docs/views/task/done.php	(rejected hunks)
+@@ -17,4 +17,4 @@ $this->params['breadcrumbs'][] = $this->title;
+ 
+ <div class="alert alert-success">
+     <h5>Задача "<?= Html::encode($model->subject) ?>" выполнена.</h5>
+-</div>
+\ No newline at end of file
++</div>

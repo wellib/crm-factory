@@ -1,0 +1,8 @@
+diff a/modules/docs/views/task/_users-list-control-results.php b/modules/docs/views/task/_users-list-control-results.php	(rejected hunks)
+@@ -25,4 +25,4 @@ use app\modules\docs\models\Task;
+         <?php endif; ?>
+     </li>
+ <?php endforeach; ?>
+-</ul>
+\ No newline at end of file
++</ul>

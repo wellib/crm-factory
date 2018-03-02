@@ -1,0 +1,10 @@
+diff a/modules/docs/views/company/update.php b/modules/docs/views/company/update.php	(rejected hunks)
+@@ -5,7 +5,7 @@ use yii\helpers\Html;
+ /* @var $this yii\web\View */
+ /* @var $model app\modules\docs\models\Company */
+ 
+-$this->title = 'Update Company: ' . $model->name;
++$this->title = 'Изменение компании: ' . $model->name;
+ $this->params['breadcrumbs'][] = ['label' => 'Структура', 'url' => ['index']];
+ $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => (string)$model->_id]];
+ $this->params['breadcrumbs'][] = 'Update';

@@ -1,0 +1,155 @@
+diff a/modules/todo/views/task/_form.php b/modules/todo/views/task/_form.php	(rejected hunks)
+@@ -11,7 +11,7 @@ use app\modules\todo\models\Task;
+ 
+ use kartik\select2\Select2;
+ use kartik\date\DatePicker;
+-
++use kartik\datetime\DateTimePicker;
+ 
+ /* @var $this View */
+ /* @var $model Task */
+@@ -24,10 +24,21 @@ $datePickerConfig = [
+         'format' => 'dd.mm.yyyy',
+         'daysOfWeekDisabled' => [0,6],
+         'todayHighlight' => true,
+-        'startDate' => '+0d', // запрещает использовать "вчера"
++        'startDate' =>  date('d-m-Y'),
+     ],
+ ];
+-
++$dateTimePickerConfig = [
++		'options' => ['placeholder' => 'Дата и время'],
++		'pluginOptions' => [
++				'autoclose' => true,
++				'format' => 'dd.mm.yyyy hh:ii',
++				'daysOfWeekDisabled' => [0,6],
++				'todayHighlight' => true,
++				'startDate' => date('Y-m-d'), 
++				'weekStart' => 1,
++				'hoursDisabled' => '0,1,2,3,4,5,6,7,21,22,23'
++				]
++		];
+ ?>
+ 
+ <?php Pjax::begin() ?>
+@@ -42,7 +53,7 @@ $datePickerConfig = [
+ 
+ 
+ 
+-    <?php if (true || $model->isNewRecord): ?>
++    <?php if ($model->isNewRecord): ?>
+         <?= $form->field($model, 'subject') ?>
+     <?php endif; ?>
+ 
+@@ -103,9 +114,12 @@ $datePickerConfig = [
+     }
+     "); ?>
+ 
+-    <?= $form->field($model, 'deadline_type')->dropDownList($model->getDeadlineTypeList(), [
+-        'onchange' => 'this.form.submit()',
+-    ]) ?>
++		<?php if ($model->isNewRecord || Yii::$app->getUser()->getIdentity()->nickname === 'root'): ?>
++				<?= $form->field($model, 'deadline_type')->dropDownList($model->getDeadlineTypeList(), [
++						'onchange' => 'this.form.submit()',
++				]) ?>
++		<?php endif; ?>
++
+     <?php if (in_array($model->getScenario(), [Task::DEADLINE_TYPE__EVERY_WEEK])): ?>
+         <?= $form->field($model, 'deadline_every_week')->inline()->checkboxList($model->getDeadlineWeekDaysList()) ?>
+     <?php endif; ?>
+@@ -139,6 +153,7 @@ $datePickerConfig = [
+                 'datePickerConfig' => $datePickerConfig,
+             ]) ?>
+         </script>
++
+         <div>
+             <?php
+ 
+@@ -167,25 +182,29 @@ JS
+     <?php endif; ?>
+ 
+ 
+-
+-
+-
+-
+     <?php if (in_array($model->getScenario(), [Task::DEADLINE_TYPE__EVERY_DAY, Task::DEADLINE_TYPE__EVERY_WEEK, Task::DEADLINE_TYPE__EVERY_MONTH])): ?>
+-        <?= $form->field($model, 'start_date')->widget(DatePicker::className(), $datePickerConfig) ?>
++        <?//= $form->field($model, 'start_date')->widget(DatePicker::className(), $datePickerConfig) ?>
++				<?= $form->field($model, 'start_date')->widget(DateTimePicker::classname(), $dateTimePickerConfig);?>
++				<?= $form->field($model, 'deadline_date')->widget(DateTimePicker::classname(), $dateTimePickerConfig);?>
+         <? //= $form->field($model, 'start_time')->dropDownList($model->getTimeList()) ?>
+     <?php endif; ?>
+ 
+-    <?php if (in_array($model->getScenario(), [Task::DEADLINE_TYPE__ONE_TIME])): ?>
+-        <?= $form->field($model, 'perform_date')->widget(DatePicker::className(), $datePickerConfig) ?>
+-        <?= $form->field($model, 'deadline_date')->widget(DatePicker::className(), $datePickerConfig) ?>
++    <?php if (in_array($model->getScenario(), [Task::DEADLINE_TYPE__ONE_TIME, Task::DEADLINE_TYPE__EVERY_DATE])): ?>
++        <?//= $form->field($model, 'perform_date')->widget(DatePicker::className(), $datePickerConfig) ?>
++				<?= $form->field($model, 'perform_date')->widget(DateTimePicker::classname(), $dateTimePickerConfig);?>
++        <? //= $form->field($model, 'deadline_date')->widget(DatePicker::className(), $datePickerConfig) ?>
++				<?= $form->field($model, 'deadline_date')->widget(DateTimePicker::classname(), $dateTimePickerConfig);?>
+     <?php endif; ?>
+ 
+     <?php if (in_array($model->getScenario(), [Task::DEADLINE_TYPE__EVERY_WEEK, Task::DEADLINE_TYPE__EVERY_DAY, Task::DEADLINE_TYPE__EVERY_MONTH])): ?>
+-        <?= $form->field($model, 'end_date')->widget(DatePicker::className(), $datePickerConfig) ?>
+-        <? //= $form->field($model, 'end_time')->dropDownList($model->getTimeList()) ?>
++        <? //= $form->field($model, 'end_date')->widget(DatePicker::className(), $datePickerConfig) ?>
++				<?= $form->field($model, 'end_date')->widget(DatePicker::classname(), $datePickerConfig);?>
+     <?php endif; ?>
+ 
++
++
++		<?php if ($model->isNewRecord || Yii::$app->getUser()->getIdentity()->nickname === 'root'): ?>
++
+     <?= $form->field($model, '_users_performers')->widget(Select2::className(), [
+         'theme' => Select2::THEME_DEFAULT,
+         'data' => $model->getUsersList(),
+@@ -254,14 +273,44 @@ JS
+             </div>
+         </div>
+     </div>
++		<?php endif; ?>
+ 
+     <div class="form-group">
+         <?= Html::submitButton($model->isNewRecord ? Module::t('task', 'CREATE__FORM__SUBMIT_BTN') : Module::t('task', 'UPDATE__FORM__SUBMIT_BTN'), [
+-            'class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary'
++            'class' => $model->isNewRecord ? 'submit-button btn btn-success' : 'btn btn-primary'
+         ]) ?>
+     </div>
+ 
++<?php
++$this->registerJs(<<<JS
++$('.submit-button').on('click', function (e) {
++    var button = $(this);
++    if (button.data('brother') == undefined) {
++        var brother = $(document.createElement(button[0].tagName));
++        brother.html('Пожалуйста подождите...');
++        brother.attr('disabled', true);
++        brother.addClass('disabled');
++        brother.addClass(button.attr('class'));
++        brother.hide();
++        brother.insertAfter(button);
++        button.data('brother', brother)
++    }else{
++        var brother = button.data('brother');
++    }
++
++    if (button.css('display') !== 'none') {
++        brother.show();
++        button.hide();
++        setTimeout(function () {
++            brother.hide();
++            button.show();
++        }, 1000);
++    }
++});
++JS
++)?>
++
+     <?php ActiveForm::end(); ?>
+ 
+ </div>
+-<?php Pjax::end() ?>
+\ No newline at end of file
++<?php Pjax::end() ?>

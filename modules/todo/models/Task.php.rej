@@ -1,0 +1,423 @@
+diff a/modules/todo/models/Task.php b/modules/todo/models/Task.php	(rejected hunks)
+@@ -154,6 +154,7 @@ class Task extends \yii\mongodb\ActiveRecord
+      * Шаблон регулярного выражения для валидации даты в формате дд.мм.гггг
+      */
+     const DATE_REGEXP_PATTERN = '/^[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{4}$/i';
++		const DATETIME_REGEXP_PATTERN = '/^[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{4} [0-9]{1,2}\:[0-9]{1,2}$/i';
+     const DATE_REGEXP_PATTERN_LABEL = 'дд.мм.гггг';
+ 
+ 
+@@ -292,6 +293,7 @@ class Task extends \yii\mongodb\ActiveRecord
+                 'deadline_type',
+ 
+                 'start_date',
++								'deadline_date',
+                 'end_date',
+ 
+ 
+@@ -309,6 +311,7 @@ class Task extends \yii\mongodb\ActiveRecord
+                 'deadline_every_week',
+ 
+                 'start_date',
++								'deadline_date',
+                 'end_date',
+ 
+ 
+@@ -327,6 +330,7 @@ class Task extends \yii\mongodb\ActiveRecord
+                 'deadline_time',
+ 
+                 'start_date',
++								'deadline_date',
+                 'end_date',
+ 
+                 '_users_approve_execute',
+@@ -339,6 +343,9 @@ class Task extends \yii\mongodb\ActiveRecord
+                 'description',
+                 'priority',
+ 
++								'perform_date',
++                'deadline_date',
++				
+                 'deadline_type',
+                 'deadline_every_date',
+ 
+@@ -387,14 +394,26 @@ class Task extends \yii\mongodb\ActiveRecord
+             // хороший валидатор, но у него из коробки не работает client side валидиация(т.е. валидация до отправки формы) https://github.com/yiisoft/yii2/issues/7745
+             //[['deadline_date', 'start_date', 'end_date'], 'date', 'format' => 'php:d.m.Y'],
+ 
+-            [['perform_date', 'deadline_date', 'start_date', 'end_date'], 'match',
+-                'pattern' => self::DATE_REGEXP_PATTERN,
++            [['perform_date', 'start_date'], 'match',
++                'pattern' => self::DATETIME_REGEXP_PATTERN,
+                 'message' => Module::t('task', 'DATE_FIELD__VALIDATE_MESSAGE__BAD_DATE', [
+                     'format' => self::DATE_REGEXP_PATTERN_LABEL,
+                 ])
+             ],
+ 
++            [['deadline_date'], 'match',
++                'pattern' => self::DATETIME_REGEXP_PATTERN,
++                'message' => Module::t('task', 'DATETIME_FIELD__VALIDATE_MESSAGE__BAD_DATE', [
++                    'format' => self::DATE_REGEXP_PATTERN_LABEL,
++                ])
++            ],
+ 
++            [['end_date'], 'match',
++                'pattern' => self::DATE_REGEXP_PATTERN,
++                'message' => Module::t('task', 'DATE_FIELD__VALIDATE_MESSAGE__BAD_DATE', [
++                    'format' => self::DATE_REGEXP_PATTERN_LABEL,
++                ])
++            ],
+ 
+             //[['deadline_time', 'start_time', 'end_time'], 'in', 'range' => array_keys($this->getTimeList())],
+ 
+@@ -423,32 +442,34 @@ class Task extends \yii\mongodb\ActiveRecord
+                 'compareAttribute' => 'deadline_date',
+                 'on' => self::DEADLINE_TYPE__ONE_TIME
+             ],
+-
++			
++						['deadline_date','validateDates'],
++						['end_date','validateDates'],
+ 
+             //[['start_date'], '']
+ 
+-            [['deadline_every_week', 'start_date', 'end_date'],
++            [['deadline_every_week', 'start_date', 'deadline_date', 'end_date'],
+                 'required', 'on' => self::DEADLINE_TYPE__EVERY_DAY
+             ],
+-            [['end_date'], DateCompareValidator::className(),
++            [['deadline_date', 'end_date'], DateCompareValidator::className(),
+                 'operator' => '>',
+                 'compareAttribute' => 'start_date',
+                 'on' => self::DEADLINE_TYPE__EVERY_DAY
+             ],
+ 
+-            [['deadline_every_week', 'start_date', 'end_date', /*'start_time', 'end_time'*/],
++            [['deadline_every_week', 'start_date', 'deadline_date', 'end_date', /*'start_time', 'end_time'*/],
+                 'required', 'on' => self::DEADLINE_TYPE__EVERY_WEEK
+             ],
+-            [['end_date'], DateCompareValidator::className(),
++            [['deadline_date', 'end_date'], DateCompareValidator::className(),
+                 'operator' => '>',
+                 'compareAttribute' => 'start_date',
+                 'on' => self::DEADLINE_TYPE__EVERY_WEEK
+             ],
+ 
+-            [['deadline_every_month', 'start_date', 'end_date'],
++            [['deadline_every_month', 'start_date', 'deadline_date', 'end_date'],
+                 'required', 'on' => self::DEADLINE_TYPE__EVERY_MONTH
+             ],
+-            [['end_date'], DateCompareValidator::className(),
++            [['deadline_date', 'end_date'], DateCompareValidator::className(),
+                 'operator' => '>',
+                 'compareAttribute' => 'start_date',
+                 'on' => self::DEADLINE_TYPE__EVERY_MONTH
+@@ -766,11 +787,93 @@ class Task extends \yii\mongodb\ActiveRecord
+     public function afterValidate()
+     {
+         if (!$this->hasErrors() && $this->isNewRecord) {
+-            $this->setDeadlines();
++         //   $this->setDeadlines();
++
++        if (!empty($this->_users_approve_execute)) {
++            // если есть пользователи которые должны утвердить(разрешить) выполнение задачи
++            // установим соответствующий статус "Ожидают утверждения"
++            $this->status = self::STATUS__APPROVAL_AWAITING;
++            $this->setApprovalDeadline();
++        } else {
++            // если нет пользователей которые должны утвердить(разрешить) выполнение задачи
++            // сразу устнавливам статус "в работе"
++            $this->status = self::STATUS__IN_PROGRESS;
++        }
++
+         }
+         parent::afterValidate(); // TODO: Change the autogenerated stub
+     }
+ 
++
++		public function validateDates(){
++
++			if ($this->deadline_type == self::DEADLINE_TYPE__ONE_TIME) {
++					if (date('d.m.Y') == date('d.m.Y',strtotime($this->perform_date)) && date('G') > date('G',strtotime($this->perform_date)) ) {
++						$this->perform_time  = date('H:i').'';
++					} else {
++						$this->perform_time  = date('H:i',strtotime($this->perform_date));
++					}
++					$this->perform_timestamp  = strtotime(date('d.m.Y',strtotime($this->perform_date)) . ' ' . $this->perform_time);
++					//$this->perform_timestamp  = strtotime($this->perform_date);
++					$this->deadline_timestamp  = strtotime($this->deadline_date);
++
++					if($this->perform_timestamp <= time()){
++							$this->addError('perform_date','Дата начала не может быть меньше текущей!');
++					}
++
++					if($this->deadline_timestamp <= $this->perform_timestamp){
++						$this->addError('deadline_date','Дата завершения не может быть меньше даты начала!');
++					}
++			}
++			elseif ($this->deadline_type == self::DEADLINE_TYPE__EVERY_DATE) {
++					if (!isset($this->template) || !$this->template ) {
++							$day = $this->deadline_every_date[0];
++							$this->perform_timestamp = strtotime($this->perform_date);
++							$this->deadline_timestamp = strtotime($this->deadline_date);
++
++							if($this->perform_timestamp <= time()){
++									$this->addError('perform_date','Дата начала не может быть меньше текущей!');
++							}
++
++							if($this->deadline_timestamp <= $this->perform_timestamp){
++								$this->addError('deadline_date','Дата завершения не может быть меньше даты начала!');
++							}
++					}		
++			} else {
++					if (!isset($this->template) || !$this->template ) {
++						//if (date('d.m.Y') == $this->start_date && date('G') > 8) {
++						if (date('d.m.Y') == date('d.m.Y',strtotime($this->start_date)) && date('G') > date('G',strtotime($this->start_date)) ) {
++							$this->start_time  = date('H:i').'';
++						} else {
++							$this->start_time  = date('H:i',strtotime($this->start_date)); //self::PERFORM_TIME_DEFAULT;
++						}
++						$this->start_timestamp  = strtotime(date('d.m.Y',strtotime($this->start_date)) . ' ' . $this->start_time);
++						//$this->end_timestamp  = strtotime($this->end_date);
++						$this->end_timestamp  = strtotime(date('d.m.Y',strtotime($this->end_date)) . ' 23:59');
++						//$this->end_time = date('H:i',strtotime($this->end_date));
++
++						//первый шаг
++						$this->perform_timestamp  = $this->start_timestamp;
++						//$this->deadline_timestamp  = strtotime(date('d.m.Y',strtotime($this->start_date)) . ' ' . $this->end_time);
++						$this->deadline_timestamp  = strtotime($this->deadline_date);
++
++						if($this->start_timestamp <= time()){
++							$this->addError('start_date','Дата начала не может быть меньше текущей!');
++						}
++						
++						if($this->end_timestamp <= $this->start_timestamp){
++							$this->addError('end_date','Дата завершения цикла не может быть меньше даты начала!');
++						}
++
++						if($this->deadline_timestamp <= $this->start_timestamp){
++							$this->addError('deadline_date','Дата завершения не может быть меньше даты начала!');
++						}
++
++					}
++			}
++
++		}
++
+     /**
+      * Обрабатывает данные и устанавливает временные метки(timestamp) для различных дедлайнов
+      */
+@@ -789,8 +892,11 @@ class Task extends \yii\mongodb\ActiveRecord
+             $this->end_timestamp = strtotime($this->end_date . '23:59:59');
+         }
+ 
+-        $this->perform_time  = self::PERFORM_TIME_DEFAULT;
+-        $this->deadline_time = self::DEADLINE_TIME_DEFAULT;
++				if (!$this->perform_time)
++					$this->perform_time  = self::PERFORM_TIME_DEFAULT;
++
++				if (!$this->deadline_time)
++					$this->deadline_time = self::DEADLINE_TIME_DEFAULT;
+ 
+         // в зависимости от типа дедлайна
+         // выполнить 1 раз или же выполнять циклично по опредленным интервалам
+@@ -800,9 +906,11 @@ class Task extends \yii\mongodb\ActiveRecord
+                 // установим timestamp дедлайны задачи которая выполняется 1 раз
+ 
+                 // начало выполнения
+-                $this->perform_timestamp  = strtotime($this->perform_date . ' ' . $this->perform_time);
++								//if (!$this->perform_timestamp)
++								//	$this->perform_timestamp  = strtotime($this->perform_date . ' ' . $this->perform_time);
+                 // завершение выполнения
+-                $this->deadline_timestamp = strtotime($this->deadline_date . ' ' . $this->deadline_time);
++                //$this->deadline_timestamp = strtotime($this->deadline_date);
++								//$this->deadline_time = date('H:i', $this->deadline_timestamp);
+ 
+                 $this->template = false; // данная задача выполниться только 1 раз, соответственно не может быть шаблоном для клонирования похожих задач
+                 break;
+@@ -832,8 +940,8 @@ class Task extends \yii\mongodb\ActiveRecord
+                 // определеяем и устанавливаем дедлайн задачи
+                 $nextDeadline = self::getNextDeadlineInWeek($startAt, $weekDays, $today);
+                 $nextDeadlineDate = date('d.m.Y', $nextDeadline);
+-                $this->perform_timestamp  = strtotime($nextDeadlineDate . ' ' . self::PERFORM_TIME_DEFAULT);
+-                $this->deadline_timestamp = strtotime($nextDeadlineDate . ' ' . self::DEADLINE_TIME_DEFAULT);
++                //$this->perform_timestamp  = strtotime($nextDeadlineDate . ' ' . self::PERFORM_TIME_DEFAULT);
++                //$this->deadline_timestamp = strtotime($nextDeadlineDate . ' ' . self::DEADLINE_TIME_DEFAULT);
+ 
+                 $this->template = true; // данная задача выполниться несколько раз, является шаблон для клонирования новых задач
+                 break;
+@@ -855,14 +963,16 @@ class Task extends \yii\mongodb\ActiveRecord
+                 // определеяем и устанавливаем дедлайн задачи
+                 $nextDeadline = self::getNextDeadlineInMonth($startAt, $this->deadline_every_month);
+                 $nextDeadlineDate = date('d.m.Y', $nextDeadline);
+-                $this->perform_timestamp  = strtotime($nextDeadlineDate . ' ' . self::PERFORM_TIME_DEFAULT);
+-                $this->deadline_timestamp = strtotime($nextDeadlineDate . ' ' . self::DEADLINE_TIME_DEFAULT);
+-
++                //$this->perform_timestamp  = strtotime($nextDeadlineDate . ' ' . self::PERFORM_TIME_DEFAULT);
++                //$this->deadline_timestamp = strtotime($nextDeadlineDate . ' ' . self::DEADLINE_TIME_DEFAULT);
++								//$this->perform_timestamp  = strtotime($this->start_date . ' ' . self::PERFORM_TIME_DEFAULT);
++                //$this->deadline_timestamp = strtotime($this->end_date);
+                 $this->template = true; // данная задача выполниться несколько раз, является шаблон для клонирования новых задач
+                 break;
+             case self::DEADLINE_TYPE__EVERY_DATE:
+                 // если задача выполняется в определенные даты
+ 
++
+                 // проверка на то является ли список дат массивом
+                 if (!is_array($this->deadline_every_date)) {
+                     return false;
+@@ -877,8 +987,7 @@ class Task extends \yii\mongodb\ActiveRecord
+ 
+                 // отсортируем в порядке возрастания
+                 sort($deadlineTimestamps);
+-
+-
++								
+                 if (empty($this->deadline_timestamp)) {
+                     // если до этого timestamp не был установлен
+                     // устанавливаем самый первый timestamp даты в списке
+@@ -904,17 +1013,19 @@ class Task extends \yii\mongodb\ActiveRecord
+                     }
+                     $nextDeadlineDate = $newTimestamp; // устанавливаем новый дедлайн
+                 }
++                //$this->perform_timestamp  = strtotime($nextDeadlineDate . ' ' . self::PERFORM_TIME_DEFAULT);
++                //$this->deadline_timestamp = strtotime($nextDeadlineDate . ' ' . self::DEADLINE_TIME_DEFAULT);
+ 
+-                $this->perform_timestamp  = strtotime($nextDeadlineDate . ' ' . self::PERFORM_TIME_DEFAULT);
+-                $this->deadline_timestamp = strtotime($nextDeadlineDate . ' ' . self::DEADLINE_TIME_DEFAULT);
++                //$this->perform_timestamp  = strtotime(date('d.m.Y',$deadlineTimestamps[0]) . ' ' . self::PERFORM_TIME_DEFAULT);
++                //$this->deadline_timestamp = strtotime(date('d.m.Y',$nextDeadlineDate) . ' ' . self::DEADLINE_TIME_DEFAULT);
++								//this->start_timestamp = $deadlineTimestamps[0] - (60 * 60 * 24);
++                //$this->start_date = date('d.m.Y', $this->start_timestamp);
++                //$this->start_time = date('H:i', $this->start_timestamp);
+ 
+-                $this->start_timestamp = $deadlineTimestamps[0] - (60 * 60 * 24);
+-                $this->start_date = date('d.m.Y', $this->start_timestamp);
+-                $this->start_time = date('H:i', $this->start_timestamp);
++                //$this->end_timestamp = end($deadlineTimestamps);
++                //$this->end_date = date('d.m.Y', $this->end_timestamp);
++                //$this->end_time = date('H:i', $this->end_timestamp);
+ 
+-                $this->end_timestamp = end($deadlineTimestamps);
+-                $this->end_date = date('d.m.Y', $this->end_timestamp);
+-                $this->end_time = date('H:i', $this->end_timestamp);
+                 break;
+             default:
+                 return false;
+@@ -926,8 +1037,8 @@ class Task extends \yii\mongodb\ActiveRecord
+             // то раскинем по атрибутам данные
+             // они по сути ничего не решают
+             // просто для того что бы в базе дедлайн хранился еще и в виде даты и времени
+-            $this->perform_date = date('d.m.Y', $this->deadline_timestamp);
+-            $this->perform_time = date('H:i', $this->deadline_timestamp);
++           // $this->perform_date = date('d.m.Y', $this->perform_timestamp);
++           // $this->perform_time = date('H:i', $this->perform_timestamp);
+         }
+ 
+         if (!empty($this->deadline_timestamp)) {
+@@ -935,46 +1046,12 @@ class Task extends \yii\mongodb\ActiveRecord
+             // то раскинем по атрибутам данные
+             // они по сути ничего не решают
+             // просто для того что бы в базе дедлайн хранился еще и в виде даты и времени
+-            $this->deadline_date = date('d.m.Y', $this->deadline_timestamp);
+-            $this->deadline_time = date('H:i', $this->deadline_timestamp);
++            //$this->deadline_date = date('d.m.Y', $this->deadline_timestamp);
++           // $this->deadline_time = date('H:i', $this->deadline_timestamp);
+         }
+ 
+ 
+-        if (!empty($this->_users_approve_execute)) {
+-            // если есть пользователи которые должны утвердить(разрешить) выполнение задачи
+-            // установим соответствующий статус "Ожидают утверждения"
+-            $this->status = self::STATUS__APPROVAL_AWAITING;
+-
+-            //if ($this->perform_date == date('d.m.Y', $now)) {
+-            //    $this->approve_execute_deadline_timestamp = strtotime('+4hours', $this->perform_timestamp);
+-            //} else {
+-            //    $this->approve_execute_deadline_timestamp = strtotime('+1day', $now);
+-            //}
+-            $this->setApprovalDeadline();
+ 
+-            //if (empty($this->approve_execute_deadline_timestamp)) {
+-            //    // если ранее не был установлен дедлайн до которого нужно утвердить задачу к выполнению
+-            //    $todayDate = date('d.m.Y', $now);
+-            //    //var_dump($todayDate, $this->deadline_date, $this->start_date);
+-            //    if ($todayDate == $this->deadline_date || $todayDate == $this->start_date) {
+-            //        // если сегодняшняя дата = началу выполнения задачи или её завершению
+-            //        // то устанавливам timestamp = сегодня + 12 часов, т.е. сегодня в до 12 часов задачу нужно утвердить
+-            //        $this->approve_execute_deadline_timestamp = strtotime('+12hours', strtotime($todayDate));
+-            //    } else {
+-            //        // если сегодняшняя дата !=(не равно) началу выполнения задачи или её завершению
+-            //        // то устанавливам timestamp = сегодня + 24 часа, т.е. до завтра в этом же время
+-            //        $this->approve_execute_deadline_timestamp = strtotime('+18hours', strtotime($todayDate));
+-            //    }
+-            //} else {
+-            //    // если ранее уже был установлен дедлайн до которого нужно утвердить задачу к выполнению
+-            //    // устанавливаем новый дедлайн на утверждение который равен -1day +18hours(т.е. завтра до 18:00) от текущего дедлайна на выполнение
+-            //    $this->approve_execute_deadline_timestamp = strtotime('-1day +18hours', strtotime($this->deadline_date));
+-            //}
+-        } else {
+-            // если нет пользователей которые должны утвердить(разрешить) выполнение задачи
+-            // сразу устнавливам статус "в работе"
+-            $this->status = self::STATUS__IN_PROGRESS;
+-        }
+     }
+ 
+     public function generateApproveDeadline()
+@@ -1389,10 +1466,10 @@ class Task extends \yii\mongodb\ActiveRecord
+         $now = self::getNow();
+ 
+         if ($this->perform_date == date('d.m.Y', $now)) {
+-
+             $this->approve_execute_deadline_timestamp = strtotime('+4hours', $this->perform_timestamp);
+         } else {
+             $timestamp = strtotime('+1day', $now);
++			//$timestamp = strtotime('+4hours', $now);
+ 
+             $weekDay = date('w', $timestamp);
+             if ($weekDay == 6) {
+@@ -1403,7 +1480,7 @@ class Task extends \yii\mongodb\ActiveRecord
+             $this->approve_execute_deadline_timestamp = $timestamp;
+         }
+ 
+-
++				if ($this->approve_execute_deadline_timestamp > $this->deadline_timestamp) $this->approve_execute_deadline_timestamp = $this->deadline_timestamp;
+         return true;
+     }
+     //
+@@ -1523,7 +1600,7 @@ class Task extends \yii\mongodb\ActiveRecord
+ 
+             if ($withoutAuthor === true) {
+                 $author = !empty($this->_author) ? (string)$this->_author : Yii::$app->getUser()->getId();
+-                if ((string)$model->_id == $author) {
++                if ((string)$model->_id == $author && Yii::$app->getUser()->getIdentity()->nickname != 'root') {
+                     continue;
+                 }
+             }
+@@ -1590,6 +1667,14 @@ class Task extends \yii\mongodb\ActiveRecord
+                             //$that->status = self::STATUS_AWAITING_EXECUTION;
+                             $that->status = self::STATUS__IN_PROGRESS;
+                             TaskLog::createNotify($this, TaskLog::NOTIFY_SET_STATUS_IN_PROGRESS);
++							
++							//ищем все дочерние задачи для акцепта
++							$subtasks = Task::find()->where(['_parent' => $that->_id])->all();
++							foreach ($subtasks as $subtask) {
++								$subtask->status = self::STATUS__IN_PROGRESS;
++								$subtask->save(false);
++							}
++				
+                         }
+ 
+                         // если хотя бы 1 не дал свое согласие не выполнение задачи
+@@ -2243,6 +2328,11 @@ class Task extends \yii\mongodb\ActiveRecord
+      */
+     public function checkAvailableAccess($user_id)
+     {
++
++				if (!Yii::$app->getUser()->isGuest && Yii::$app->getUser()->getIdentity()->nickname === 'root') {
++            return true;
++				}
++
+         if ($user_id == (string) $this->_author) {
+             return true;
+         }

@@ -1,0 +1,268 @@
+html,
+body {
+    height: 100%;
+}
+
+.wrap {
+    min-height: 100%;
+    height: auto;
+    margin: 0 auto -60px;
+    padding: 0 0 60px;
+}
+
+.wrap > .container {
+    padding: 70px 15px 20px;
+}
+
+.footer {
+    height: 60px;
+    background-color: #f5f5f5;
+    border-top: 1px solid #ddd;
+    padding-top: 20px;
+}
+
+.jumbotron {
+    text-align: center;
+    background-color: transparent;
+}
+.jumbotron h1, .jumbotron .h1 {
+    font-size: 36px;
+}
+.jumbotron .btn {
+    font-size: 21px;
+    padding: 14px 24px;
+}
+
+.not-set {
+    color: #c55;
+    font-style: italic;
+}
+
+/* add sorting icons to gridview sort links */
+a.asc:after, a.desc:after {
+    position: relative;
+    top: 1px;
+    display: inline-block;
+    font-family: 'Glyphicons Halflings';
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
+    padding-left: 5px;
+}
+
+a.asc:after {
+    content: /*"\e113"*/ "\e151";
+}
+
+a.desc:after {
+    content: /*"\e114"*/ "\e152";
+}
+
+.sort-numerical a.asc:after {
+    content: "\e153";
+}
+
+.sort-numerical a.desc:after {
+    content: "\e154";
+}
+
+.sort-ordinal a.asc:after {
+    content: "\e155";
+}
+
+.sort-ordinal a.desc:after {
+    content: "\e156";
+}
+
+.grid-view th {
+    white-space: nowrap;
+}
+
+.hint-block {
+    display: block;
+    margin-top: 5px;
+    color: #999;
+}
+
+.error-summary {
+    color: #a94442;
+    background: #fdf7f7;
+    border-left: 3px solid #eed3d7;
+    padding: 10px 20px;
+    margin: 0 0 15px 0;
+}
+
+.profile_pic {
+    width: 35%;
+    float: left;
+    max-width: 70px;
+}
+.profile_info {
+    padding: 14px 0 10px;
+    width: 65%;
+    float: left;
+}
+.site_title img {
+    width: 40px;
+}
+.profile_info span {
+    font-size: 13px;
+    line-height: 13px;
+    color: #BAB8B8;
+}
+.user-index td:nth-child(1),
+.contract-index td:nth-child(1),
+.template-index td:nth-child(1),
+.contractcompany-index td:nth-child(1),
+.x_content  td:nth-child(1),
+.search-index td:nth-child(1){
+    width: 50px;
+}
+.contract-index td:nth-child(3) {
+    width: 110px;
+}
+.user-index td:nth-child(2) {
+    width: 110px;
+}
+.user-index td:nth-child(6),
+.contract-index td:nth-child(5), .template-index td:nth-child(3),
+.contractcompany-index td:nth-child(3),
+.template-index td:nth-child(4),
+.search-index td:nth-child(6),
+.search-index td:nth-child(7) {
+    width: 115px;
+}
+.contract-index td:nth-child(5) div, .template-index td:nth-child(3) div{
+    display: block;margin: 0;
+}
+.contract-index td:nth-child(5) .input-daterange .input-group-addon, .template-index td:nth-child(3) .input-daterange .input-group-addon{
+    width: auto;
+    min-width: 16px;
+    padding: 4px 5px;
+    line-height: 1.42857143;
+    text-shadow: 0 1px 0 #fff;
+    border-width: 1px 0;
+    margin: 0;
+    float: left;
+    display: block;
+    height: 30px;
+    font-size: 12px;
+    width: 22px;
+}
+.contract-index td:nth-child(5) .input-group .form-control, .template-index td:nth-child(3)  .input-group .form-control{
+    position: relative;
+    z-index: 2;
+    float: left;
+    width: 70px;
+    margin-bottom: 0;
+    height: 30px;
+    padding: 0;
+    font-size: 12px;
+}
+.search-index td:nth-child(3), .search-index td:nth-child(4){
+    width: 115px;
+}
+.contract-index .form-control {
+    padding: 6px 2px;
+}
+.nav-md .container.body .right_col {
+    padding: 10px 20px 0;
+    margin-left: 230px;
+    padding-bottom: 20px;
+}
+
+table.calendar th{
+  text-align: center;
+  width: 14%;
+}
+
+table.calendar td>div{
+  min-height: 160px;
+}
+
+table.calendar .addjobnew{
+  cursor: pointer;
+}
+
+table.calendar td>div{
+  background: #CFE1F3;
+  border-radius: 2px;
+  padding: 4px;
+}
+
+
+table.calendar .w6>div,
+table.calendar .w7>div{
+  background-color: #FCC;
+}
+.events{
+  font-size: small;
+}
+.event-edit{
+  cursor: pointer;
+  padding: .2em .6em .3em;
+  vertical-align: baseline;
+  border-radius: .25em;
+  display: block;
+}
+.calendar .event-edit:hover{
+  color: blue;
+  border: 1px solid;
+}
+.event_types>label{
+  width: 100%;
+  padding: 0.2em 0.5em;
+  border-radius:0.3em;
+  cursor: pointer;
+}
+.op05{
+  opacity: 0.3;
+}
+.op05:hover{
+  opacity: 1;
+}
+.event .del,
+.event .edit{
+  float: right;
+  color: #6F0000;
+  opacity: 0.3;
+}
+.event:hover .del,
+.event:hover .edit{
+  opacity: 1;
+}
+
+table.month .addjob{
+  color: green;
+  float:right;
+  cursor: pointer;
+  font-size: 1.2em;
+}
+table.calendar_week .addjob{
+  cursor: pointer;
+}
+table.calendar_week tr.day{
+  border-top: 6px solid #ADADAD;
+}
+#myModal .modal-header,
+#modalevent .modal-header {
+    min-height: 16.42857143px;
+    padding: 5px;
+    border-bottom: none;
+}
+#myModal .modal-body,
+#modalevent .modal-body {
+    padding-top: 0px;
+}
+.calendar_day td:nth-child(1),
+.calendar_week td:nth-child(1) {
+    width: 70px;
+}
+.calendar_day td:nth-child(4),
+.calendar_week td:nth-child(4) {
+    width: 110px;
+}
+.calendar_day td:nth-child(5),
+.calendar_week td:nth-child(5) {
+    width: 110px;
+}

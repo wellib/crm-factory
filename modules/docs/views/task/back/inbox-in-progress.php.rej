@@ -1,0 +1,17 @@
+diff a/modules/docs/views/task/back/inbox-in-progress.php b/modules/docs/views/task/back/inbox-in-progress.php	(rejected hunks)
+@@ -3,12 +3,12 @@
+ use yii\helpers\Html;
+ use yii\grid\GridView;
+ use yii\widgets\Pjax;
+-use app\modules\docs\Module;
+-use app\modules\docs\models\Task;
++use app\modules\todo\Module;
++use app\modules\todo\models\Task;
+ use app\themes\gentelella\widgets\Panel;
+ 
+ /* @var $this yii\web\View */
+-/* @var $searchModel app\modules\docs\models\TaskSearch */
++/* @var $searchModel app\modules\todo\models\TaskSearch */
+ /* @var $dataProvider yii\data\ActiveDataProvider */
+ 
+ $this->title = Module::t('task', 'INBOX');

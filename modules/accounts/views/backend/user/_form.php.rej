@@ -1,0 +1,17 @@
+diff a/modules/accounts/views/backend/user/_form.php b/modules/accounts/views/backend/user/_form.php	(rejected hunks)
+@@ -32,10 +32,15 @@ use app\modules\accounts\Module;
+         }
+     "); ?>
+ 
++		<?php if (!Yii::$app->getUser()->isGuest && Yii::$app->getUser()->getIdentity()->nickname === 'root') : ?>
+     <?= $form->field($model, 'name') ?>
+ 
+     <?= $form->field($model, 'position') ?>
+ 
++		<?= $form->field($model, 'rukovodstvo')->checkbox() ?>
++
++		<?= $form->field($model, 'status')->checkbox() ?>
++		<?php endif ?>
+ 
+     <?= $form->field($model, 'avatar_upload')->fileInput() ?>
+     <?php if ($avatar = $model->getAvatar()): ?>
